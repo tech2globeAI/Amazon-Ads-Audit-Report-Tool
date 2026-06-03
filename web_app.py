@@ -3,21 +3,34 @@
 
 from __future__ import annotations
 
+import os
 import traceback
-from pathlib import Path
+from io import BytesIO
 
 from flask import Flask, render_template, request, send_file
-from io import BytesIO
 
 from amazon_ads_audit import generate_audit_report_bytes
 
+# Vercel serverless request body limit is ~4.5 MB on Hobby; 50 MB for local dev
+_IS_VERCEL = bool(os.environ.get("VERCEL"))
+_MAX_UPLOAD_MB = 4.5 if _IS_VERCEL else 50
+
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
+app.config["MAX_CONTENT_LENGTH"] = int(_MAX_UPLOAD_MB * 1024 * 1024)
+
+
+@app.route("/health")
+def health():
+    return {"status": "ok", "service": "amazon-ads-audit-report"}
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        max_upload_mb=_MAX_UPLOAD_MB,
+        is_vercel=_IS_VERCEL,
+    )
 
 
 @app.route("/generate", methods=["POST"])
@@ -34,6 +47,8 @@ def generate():
         return render_template(
             "index.html",
             error="Only Excel files (.xlsx, .xlsm) are supported.",
+            max_upload_mb=_MAX_UPLOAD_MB,
+            is_vercel=_IS_VERCEL,
         ), 400
 
     try:
@@ -42,6 +57,8 @@ def generate():
             return render_template(
                 "index.html",
                 error="The uploaded file is empty.",
+                max_upload_mb=_MAX_UPLOAD_MB,
+                is_vercel=_IS_VERCEL,
             ), 400
 
         out_bytes, out_name = generate_audit_report_bytes(file_bytes, filename)
@@ -56,6 +73,8 @@ def generate():
         return render_template(
             "index.html",
             error=str(exc),
+            max_upload_mb=_MAX_UPLOAD_MB,
+            is_vercel=_IS_VERCEL,
         ), 500
 
 

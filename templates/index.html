@@ -154,7 +154,7 @@
           <label for="bulk_sheet">
             <div class="icon">📊</div>
             <div><strong>Click to choose file</strong> or drag and drop here</div>
-            <div class="hint">Amazon Ads bulk export (.xlsx, max 50 MB)</div>
+            <div class="hint">Amazon Ads bulk export (.xlsx, max {{ max_upload_mb|default(50) }} MB{% if is_vercel %} — Vercel hosting limit{% endif %})</div>
           </label>
         </div>
         <div id="file-name"></div>

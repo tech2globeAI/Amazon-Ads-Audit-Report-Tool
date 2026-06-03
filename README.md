@@ -38,6 +38,29 @@ python web_app.py --host 0.0.0.0 --port 8080
 
 Use `--host 0.0.0.0` only on a trusted network if others need access on your LAN.
 
+## Deploy on Vercel
+
+This repo is configured for [Vercel Flask](https://vercel.com/docs/frameworks/backend/flask).
+
+1. Push the repo to GitHub (e.g. `tech2globeAI/Amazon-Ads-Audit-Report-Tool`).
+2. In [Vercel](https://vercel.com): **Add New Project** → import the repo.
+3. Framework preset: **Other** (or Flask if offered). Root directory: `.`
+4. Build settings (usually auto-detected):
+   - **Install Command:** `pip install -r requirements.txt`
+   - Entrypoint is set in `pyproject.toml`: `web_app:app`
+5. Deploy. Open the production URL (e.g. `https://your-project.vercel.app`).
+
+### Vercel notes
+
+| Topic | Detail |
+|--------|--------|
+| Entrypoint | `pyproject.toml` → `[tool.vercel] entrypoint = "web_app:app"` |
+| Upload size | ~**4.5 MB** max on Vercel (serverless limit). Use local `python web_app.py` for larger bulk sheets. |
+| Timeout | `vercel.json` sets `maxDuration: 60` (requires Pro for >10s on some plans). |
+| Health check | `GET /health` returns JSON status |
+
+Redeploy after pushing changes to `main`.
+
 ## Download the bulk sheet from Amazon Ads
 
 1. Sign in to [Amazon Advertising](https://advertising.amazon.com/) (Seller Central / Vendor Central ads console).

@@ -1,0 +1,21 @@
+[project]
+name = "amazon-ads-audit-report"
+version = "1.0.0"
+description = "Generate Amazon Ads audit reports from bulk sheet uploads"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "flask>=3.0.0",
+]
+
+[tool.vercel]
+# Flask app instance: web_app.py → variable `app`
+entrypoint = "web_app:app"
+# Also available via app.py (Vercel default location)
+
+[tool.vercel.scripts]
+# Optional: run before deploy (leave empty if not needed)
+# build = "python -c \"print('ok')\""
