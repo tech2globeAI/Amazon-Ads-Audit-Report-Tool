@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amazon Ads Audit Report</title>
+  <style>
+    :root {
+      --navy: #1f3864;
+      --blue: #2e75b6;
+      --light: #bdd7ee;
+      --bg: #f4f7fb;
+      --text: #1a1a2e;
+      --error: #b42318;
+      --success: #027a48;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 8px rgba(31, 56, 100, 0.25);
+    }
+    header h1 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+    header p { margin: 0.4rem 0 0; opacity: 0.9; font-size: 0.95rem; }
+    main {
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 3rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px rgba(31, 56, 100, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+    .card h2 {
+      margin: 0 0 1rem;
+      font-size: 1.1rem;
+      color: var(--blue);
+    }
+    .drop-zone {
+      border: 2px dashed var(--light);
+      background: #f8fbff;
+      border-radius: 10px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--blue);
+      background: #eef6fc;
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+    .drop-zone label {
+      cursor: pointer;
+      display: block;
+    }
+    .drop-zone .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .drop-zone .hint { color: #64748b; font-size: 0.9rem; margin-top: 0.5rem; }
+    #file-name {
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      min-height: 1.25rem;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 1.25rem;
+      padding: 0.75rem 1.75rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--navy); }
+    .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .alert {
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .alert-error {
+      background: #fef3f2;
+      color: var(--error);
+      border: 1px solid #fecdca;
+    }
+    .steps {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    .steps ol {
+      margin: 0.5rem 0 0;
+      padding-left: 1.25rem;
+      line-height: 1.7;
+      color: #475569;
+    }
+    .steps li strong { color: var(--navy); }
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2rem;
+    }
+    .loading {
+      display: none;
+      margin-top: 1rem;
+      color: var(--blue);
+      font-size: 0.95rem;
+    }
+    .loading.visible { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Amazon Ads Audit Report</h1>
+    <p>Upload your Amazon Ads bulk sheet and download a formatted 3-sheet audit workbook.</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Generate report</h2>
+
+      {% if error %}
+      <div class="alert alert-error" role="alert">{{ error }}</div>
+      {% endif %}
+
+      <form id="upload-form" action="/generate" method="post" enctype="multipart/form-data">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="bulk_sheet" name="bulk_sheet" accept=".xlsx,.xlsm" required />
+          <label for="bulk_sheet">
+            <div class="icon">📊</div>
+            <div><strong>Click to choose file</strong> or drag and drop here</div>
+            <div class="hint">Amazon Ads bulk export (.xlsx, max 50 MB)</div>
+          </label>
+        </div>
+        <div id="file-name"></div>
+        <div class="loading" id="loading">Generating report… this may take a minute for large files.</div>
+        <button type="submit" class="btn" id="submit-btn" disabled>Generate &amp; download</button>
+      </form>
+
+      <div class="steps">
+        <h2>How to get your bulk sheet</h2>
+        <ol>
+          <li>Sign in to <strong>Amazon Advertising</strong> → <strong>Bulk operations</strong>.</li>
+          <li>Download the spreadsheet for your desired date range.</li>
+          <li>Upload it here and click <strong>Generate &amp; download</strong>.</li>
+        </ol>
+        <p style="margin-top:1rem;color:#64748b;font-size:0.9rem;">
+          Output includes sheets: <strong>OPD</strong>, <strong>ASIN wise report.</strong>, and <strong>Keywords</strong>.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer>CLI also available: python amazon_ads_audit.py bulk_sheet.xlsx</footer>
+
+  <script>
+    const input = document.getElementById("bulk_sheet");
+    const fileName = document.getElementById("file-name");
+    const submitBtn = document.getElementById("submit-btn");
+    const dropZone = document.getElementById("drop-zone");
+    const form = document.getElementById("upload-form");
+    const loading = document.getElementById("loading");
+
+    function updateFileLabel(file) {
+      if (file) {
+        fileName.textContent = "Selected: " + file.name;
+        submitBtn.disabled = false;
+      } else {
+        fileName.textContent = "";
+        submitBtn.disabled = true;
+      }
+    }
+
+    input.addEventListener("change", () => updateFileLabel(input.files[0]));
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        input.files = files;
+        updateFileLabel(files[0]);
+      }
+    });
+
+    form.addEventListener("submit", () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing…";
+      loading.classList.add("visible");
+    });
+  </script>
+</body>
+</html>
